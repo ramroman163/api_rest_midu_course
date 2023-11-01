@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prueba API REST</title>
+  <style>
+    article{
+      border: 1px solid black;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    img{
+      width: 320px;
+      height: auto;
+      max-height: 100%;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
+  <script type="module">
+    let page = 1
+    fetch(`http://localhost:3000/movies?page=${page}`)
+      .then(res => res.json())
+      .then(movies => {
+        let html = movies.map(movie => {
+          return `
+          <article data-id="${movie.id}">
+            <h2>${movie.title}</h2>  
+            <img src="${movie.poster}" alt="${movie.title}">
+            <p>${movie.year}<p>  
+
+            <button>Eliminar</button>
+          </article>`
+        }).join('')
+
+        html += `<button id="btn-pag" page-n=${page}>Sig</button>`
+
+        document.querySelector('main').innerHTML = html
+
+        document.querySelector('#btn-pag').addEventListener('click', () =>{
+          page += 1
+        })
+
+        document.addEventListener('click', e => {
+          if(e.target.matches('button')){
+            const article = e.target.closest('article')
+            const id = article.dataset.id
+
+            fetch(`http://localhost:3000/movies/${id}`, {
+              method: 'DELETE'
+            })
+              .then(res => {
+                if(res.ok){
+                  article.remove()
+                }
+              })
+          }
+        })
+      })
+  </script>
+</head>
+<body>
+  <main></main>
+</body>
+</html>
